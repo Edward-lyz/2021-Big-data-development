@@ -6,13 +6,11 @@
 
 ## Quick Start
 ```
-git clone https://github.com/yanagishima/yanagishima.git
-cd yanagishima
-git checkout -b [version] refs/tags/[version]
+cd code
 ./gradlew distZip
 cd build/distributions
-unzip yanagishima-[version].zip
-cd yanagishima-[version]
+unzip yanagishima-22.zip
+cd yanagishima-22
 vim config/application.yml
 nohup bin/yanagishima-start.sh >y.log 2>&1 &
 ```
