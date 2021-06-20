@@ -1,0 +1,74 @@
+package Question_4
+import Question_2.Q2_2.{connection, driver, password, url, username}
+import java.sql.{Connection, DriverManager, PreparedStatement, SQLXML}
+import java.io.{BufferedReader, FileReader, IOException}
+
+/**
+ * 通过kafka的消费者下载在本地的csv中的实时数据写入mysql中
+ * author 李琰朕
+ * date 2021/6/18
+ */
+
+object Q4 {
+  // 访问本地MySQL服务器，通过3306端口访问mysql数据库
+  val url = "jdbc:mysql://localhost:3306/buy_ticket?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&rewriteBatchedStatements=true";
+  //驱动名称
+  val driver = "com.mysql.cj.jdbc.Driver"
+
+  //用户名
+  val username = "root"
+  //密码
+  val password = "12345678"
+  //初始化数据连接
+  var connection: Connection = _
+  def main(args: Array[String]): Unit= {
+    try {
+      //注册Driver
+      Class.forName (driver)
+      //得到连接
+      connection = DriverManager.getConnection (url, username, password)
+      //删除已有数据
+      val delete_sql = "truncate buy_ticket"
+      val del_statement = connection.createStatement ()
+      val del_res = del_statement.executeUpdate (delete_sql)
+
+      //将consumer消费的信息按行写入SQL
+      val csvFile: String = "/Volumes/HD/Onedrive/STUDY/大三下/实训/Exercise_3/Additional_Question/result.csv"
+      var line: String = ""
+      val cvsSplitBy: String = ","
+      var ID = 1
+      try {
+        val br = new BufferedReader (new FileReader (csvFile) )
+        try while ( {
+          line = br.readLine;
+          line != null
+        }) { // use comma as separator
+          var data = new Array[String] (5)
+          data = line.split (cvsSplitBy)
+          var name = data (0)
+          var date = data (1)
+          var address = data (2)
+          var origin = data (3)
+          var destination = data (4)
+          //println(name+date+address+origin+destination)
+          val sql = "INSERT INTO buy_ticket (name, date,address,origin,destination,ID) VALUES (?,?,?,?,?,?)"
+          val prestatement = connection.prepareStatement (sql)
+          prestatement.setString (1, name)
+          prestatement.setString (2, date)
+          prestatement.setString (3, address)
+          prestatement.setString (4, origin)
+          prestatement.setString (5, destination)
+          prestatement.setInt (6, ID)
+          prestatement.addBatch ()
+          val rs = prestatement.executeUpdate()
+          ID = ID + 1
+        }
+        catch {
+          case e: IOException =>
+            e.printStackTrace ()
+        } finally if (br != null) br.close ()
+        }
+      }
+    println ("全部写入完毕！")
+    }
+}

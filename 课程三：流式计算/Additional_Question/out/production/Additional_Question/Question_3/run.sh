@@ -1,0 +1,2 @@
+maxwell --user='root' --password='12345678' --host='127.0.0.1'
+   --producer=kafka --kafka.bootstrap.servers='bigdata35.depts.bingosoft.net:29035,bigdata36.depts.bingosoft.net:29036,bigdata37.depts.bingosoft.net:29037' --kafka_topic=edwards_ticket_topic --port=3306 --filter 'exclude: mysql.*, include: buy_ticket.*'
